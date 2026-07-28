@@ -1,14 +1,14 @@
 class Wt < Formula
   desc "git worktree switcher with Claude Code history preview"
   homepage "https://github.com/todokr/wt"
-  version "0.3.0"
+  version "0.3.1"
 
   depends_on "fzf"
 
   on_macos do
     on_arm do
       url "https://github.com/todokr/wt/releases/download/v#{version}/wt-aarch64-apple-darwin"
-      sha256 "1f33f5a14f12255fbfc87a291196ad015800d8930176cf90dce46ba7d0c4c7ec"
+      sha256 "ac8a134c1457c370b596be148e8b56e05ea927142ffae40f7840ea7ea0d0f7f8"
 
       def install
         bin.install "wt-aarch64-apple-darwin" => "wt"
@@ -16,7 +16,7 @@ class Wt < Formula
     end
     on_intel do
       url "https://github.com/todokr/wt/releases/download/v#{version}/wt-x86_64-apple-darwin"
-      sha256 "0c1affe4900379069afe6b72c36ac9b1df8a81e1d2db118aee5120ec55142ebe"
+      sha256 "e042897e6926da85c9918fad6830754dc30a3428c0345cd3803ccdfa13ca6bb1"
 
       def install
         bin.install "wt-x86_64-apple-darwin" => "wt"
@@ -26,7 +26,7 @@ class Wt < Formula
 
   on_linux do
     url "https://github.com/todokr/wt/releases/download/v#{version}/wt-x86_64-unknown-linux-gnu"
-    sha256 "c7b0d012b93d622ac1b6e475c65b161b8e2795872a2fe9fad075c8f5a9774c99"
+    sha256 "838e5b6f5608859d5f9eca42e90d104f29de0ff8fdf19318ccdb3b41fe4975c0"
 
     def install
       bin.install "wt-x86_64-unknown-linux-gnu" => "wt"
