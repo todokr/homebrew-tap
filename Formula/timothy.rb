@@ -2,13 +2,13 @@
 
 # This Formula belongs in todokr/homebrew-tap under Formula/timothy.rb.
 # Update `url`, `sha256`, and `version` for each release. The GitHub Release
-# body of timothy-cli includes the exact values to paste.
+# body of timothy includes the exact values to paste.
 class Timothy < Formula
   desc "Upload LLM-generated HTML and share via time-limited URLs"
-  homepage "https://github.com/todokr/timothy-cli"
-  url "https://github.com/todokr/timothy-cli/releases/download/v0.1.3/tim"
-  sha256 "3cefd2827d7818b7fa837107e65ed76dd792c2a2543a2b918c4a4b9d9b9c45e1"
-  version "0.1.3"
+  homepage "https://github.com/todokr/timothy"
+  url "https://github.com/todokr/timothy/releases/download/v0.3.0/tim"
+  sha256 "8069b305a9a3dd8d0200df59d0e4aa6597032ff0780d947ec6e49e6410a42536"
+  version "0.3.0"
   license "EPL-2.0"
 
   depends_on "node"
