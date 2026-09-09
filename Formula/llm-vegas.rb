@@ -10,6 +10,9 @@ class LlmVegas < Formula
 
   def install
     system "npm", "ci"
+    # npm 11 以降は postinstall を既定で実行しないため、
+    # electron 本体のバイナリは自分で取りに行く
+    system "node", "node_modules/electron/install.js"
     system "npm", "run", "build"
     # electron は実行時に要るので、開発依存だけを落とす
     system "npm", "prune", "--omit=dev"
