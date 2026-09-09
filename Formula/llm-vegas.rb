@@ -8,21 +8,37 @@ class LlmVegas < Formula
   depends_on "node" => :build
   depends_on :macos
 
+  # Electron 本体は npm の postinstall に任せない。
+  # Homebrew のビルドサンドボックス内では展開が途中で壊れるため、
+  # Homebrew の resource として取得する。
+  # バージョンは llm-vegas の package-lock.json と一致させること。
+  on_arm do
+    resource "electron" do
+      url "https://github.com/electron/electron/releases/download/v33.4.11/electron-v33.4.11-darwin-arm64.zip"
+      sha256 "9c763751c280b20ec93cecdc7f369bed876fc6728863a9ba5d7435096401f048"
+    end
+  end
+
+  on_intel do
+    resource "electron" do
+      url "https://github.com/electron/electron/releases/download/v33.4.11/electron-v33.4.11-darwin-x64.zip"
+      sha256 "67f3b851e7583309e7bbe3e3e819b1e1c6033ab57207d838bc4ed4982ccef456"
+    end
+  end
+
   def install
+    ENV["ELECTRON_SKIP_BINARY_DOWNLOAD"] = "1"
     system "npm", "ci"
-    # npm 11 以降は postinstall を既定で実行しないため、
-    # electron 本体のバイナリは自分で取りに行く
-    system "node", "node_modules/electron/install.js"
     system "npm", "run", "build"
-    # electron は実行時に要るので、開発依存だけを落とす
-    system "npm", "prune", "--omit=dev"
 
-    libexec.install Dir["*"]
+    # 実行時に必要なのはビルド済みの dist と package.json だけ。
+    # electron API は Electron のランタイムに組み込まれている
+    libexec.install "dist", "package.json"
+    (libexec/"electron").install resource("electron")
 
-    # electron のバイナリを直接叩く。実行時に node は要らない
     (bin/"llm-vegas").write <<~SH
       #!/bin/bash
-      exec "#{libexec}/node_modules/electron/dist/Electron.app/Contents/MacOS/Electron" \\
+      exec "#{libexec}/electron/Electron.app/Contents/MacOS/Electron" \\
         "#{libexec}" "$@"
     SH
     chmod 0755, bin/"llm-vegas"
@@ -41,6 +57,7 @@ class LlmVegas < Formula
 
   test do
     assert_predicate libexec/"dist/main/index.js", :exist?
-    assert_predicate libexec/"node_modules/electron/dist/Electron.app/Contents/MacOS/Electron", :executable?
+    assert_predicate libexec/"electron/Electron.app/Contents/Frameworks", :directory?
+    assert_predicate libexec/"electron/Electron.app/Contents/MacOS/Electron", :executable?
   end
 end
