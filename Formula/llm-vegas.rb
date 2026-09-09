@@ -1,8 +1,8 @@
 class LlmVegas < Formula
   desc "Slot machine that spins itself when Claude burns output tokens"
   homepage "https://github.com/todokr/llm-vegas"
-  url "https://github.com/todokr/llm-vegas/archive/refs/tags/v0.1.0.tar.gz"
-  sha256 "6f14b8ce10758798487c34362b2323550917425638500939046f2616bdc9ad99"
+  url "https://github.com/todokr/llm-vegas/archive/refs/tags/v0.1.1.tar.gz"
+  sha256 "0ca203037d9563076596c171c410d99c08806788d9e48f6e542dff60eaeecf90"
   license "EPL-2.0"
 
   # llm-vegas の package-lock.json が固定している electron と一致させること
