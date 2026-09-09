@@ -44,6 +44,10 @@ class LlmVegas < Formula
     chmod 0755, bin/"llm-vegas"
   end
 
+  # Electron.app は署名済みのプリビルドバイナリなので、
+  # Homebrew による dylib ID の書き換えをかけない（署名が壊れる）
+  def fix_dynamic_linkage; end
+
   def caveats
     <<~CAVEATS
       画面右上に筐体が常駐します。終了は筐体の ✕ ボタンです。
