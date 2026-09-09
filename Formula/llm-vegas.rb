@@ -57,6 +57,34 @@ class LlmVegas < Formula
       exec "${app}" "#{libexec}" "$@"
     SH
     chmod 0755, bin/"llm-vegas"
+
+    # Finder / Spotlight から起動するための薄い .app ランチャー。
+    # 中身はシェルスクリプトだけなので Homebrew の再リンク対象にならない。
+    # opt_bin を指すのでアップグレードしてもコピーが壊れない。
+    app = libexec/"LLM Vegas.app"
+    (app/"Contents/MacOS").mkpath
+    (app/"Contents/Info.plist").write <<~XML
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+      <plist version="1.0">
+      <dict>
+        <key>CFBundleName</key><string>LLM Vegas</string>
+        <key>CFBundleDisplayName</key><string>LLM Vegas</string>
+        <key>CFBundleIdentifier</key><string>com.todokr.llm-vegas.launcher</string>
+        <key>CFBundleExecutable</key><string>llm-vegas</string>
+        <key>CFBundlePackageType</key><string>APPL</string>
+        <key>CFBundleVersion</key><string>#{version}</string>
+        <key>CFBundleShortVersionString</key><string>#{version}</string>
+        <key>LSMinimumSystemVersion</key><string>11.0</string>
+        <key>LSUIElement</key><true/>
+      </dict>
+      </plist>
+    XML
+    (app/"Contents/MacOS/llm-vegas").write <<~SH
+      #!/bin/bash
+      exec "#{opt_bin}/llm-vegas"
+    SH
+    chmod 0755, app/"Contents/MacOS/llm-vegas"
   end
 
   def caveats
@@ -65,6 +93,11 @@ class LlmVegas < Formula
 
         llm-vegas            # 起動
         llm-vegas &          # ターミナルを離す場合
+
+      Finder や Spotlight から起動したい場合は、同梱の .app を
+      /Applications にコピーしてください:
+
+        cp -R "#{opt_libexec}/LLM Vegas.app" /Applications/
 
       初回起動時だけ Electron ランタイムを
       ~/Library/Application Support/LLM Vegas/runtime に展開します。
@@ -76,5 +109,6 @@ class LlmVegas < Formula
   test do
     assert_predicate libexec/"dist/main/index.js", :exist?
     assert_predicate libexec/"electron.zip", :exist?
+    assert_predicate libexec/"LLM Vegas.app/Contents/MacOS/llm-vegas", :executable?
   end
 end
