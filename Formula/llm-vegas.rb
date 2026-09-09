@@ -5,13 +5,12 @@ class LlmVegas < Formula
   sha256 "6f14b8ce10758798487c34362b2323550917425638500939046f2616bdc9ad99"
   license "EPL-2.0"
 
+  # llm-vegas の package-lock.json が固定している electron と一致させること
+  ELECTRON_VERSION = "33.4.11"
+
   depends_on "node" => :build
   depends_on :macos
 
-  # Electron 本体は npm の postinstall に任せない。
-  # Homebrew のビルドサンドボックス内では展開が途中で壊れるため、
-  # Homebrew の resource として取得する。
-  # バージョンは llm-vegas の package-lock.json と一致させること。
   on_arm do
     resource "electron" do
       url "https://github.com/electron/electron/releases/download/v33.4.11/electron-v33.4.11-darwin-arm64.zip"
@@ -31,22 +30,34 @@ class LlmVegas < Formula
     system "npm", "ci"
     system "npm", "run", "build"
 
-    # 実行時に必要なのはビルド済みの dist と package.json だけ。
+    # 実行時に要るのはビルド済みの dist と package.json だけ。
     # electron API は Electron のランタイムに組み込まれている
     libexec.install "dist", "package.json"
-    (libexec/"electron").install resource("electron")
+
+    # Homebrew は keg 内のあらゆる Mach-O を再リンクして署名し直すため
+    # (keg_relocate.rb の mach_o_files)、Electron.app を展開したまま置くと
+    # 署名が壊れて起動できなくなる。zip のまま置き、初回起動時に展開する。
+    cp resource("electron").cached_download, libexec/"electron.zip"
 
     (bin/"llm-vegas").write <<~SH
       #!/bin/bash
-      exec "#{libexec}/electron/Electron.app/Contents/MacOS/Electron" \\
-        "#{libexec}" "$@"
+      set -euo pipefail
+
+      runtime="${HOME}/Library/Application Support/LLM Vegas/runtime/#{ELECTRON_VERSION}"
+      app="${runtime}/Electron.app/Contents/MacOS/Electron"
+
+      if [ ! -x "${app}" ]; then
+        echo "Unpacking the Electron runtime (first run only)..." >&2
+        rm -rf "${runtime}"
+        mkdir -p "${runtime}"
+        # ditto なら署名と拡張属性を保ったまま展開できる
+        /usr/bin/ditto -x -k "#{libexec}/electron.zip" "${runtime}"
+      fi
+
+      exec "${app}" "#{libexec}" "$@"
     SH
     chmod 0755, bin/"llm-vegas"
   end
-
-  # Electron.app は署名済みのプリビルドバイナリなので、
-  # Homebrew による dylib ID の書き換えをかけない（署名が壊れる）
-  def fix_dynamic_linkage; end
 
   def caveats
     <<~CAVEATS
@@ -55,13 +66,15 @@ class LlmVegas < Formula
         llm-vegas            # 起動
         llm-vegas &          # ターミナルを離す場合
 
+      初回起動時だけ Electron ランタイムを
+      ~/Library/Application Support/LLM Vegas/runtime に展開します。
+
       Claude Code が ~/.claude/projects に transcript を書いている必要があります。
     CAVEATS
   end
 
   test do
     assert_predicate libexec/"dist/main/index.js", :exist?
-    assert_predicate libexec/"electron/Electron.app/Contents/Frameworks", :directory?
-    assert_predicate libexec/"electron/Electron.app/Contents/MacOS/Electron", :executable?
+    assert_predicate libexec/"electron.zip", :exist?
   end
 end
