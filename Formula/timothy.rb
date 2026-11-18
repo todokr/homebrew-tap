@@ -6,9 +6,9 @@
 class Timothy < Formula
   desc "Upload LLM-generated HTML and share via time-limited URLs"
   homepage "https://github.com/todokr/timothy"
-  url "https://github.com/todokr/timothy/releases/download/v0.4.0/tim"
-  sha256 "527627f9ea585fe1123674df18925077b53182aec6c02f69a6533584ded17e6f"
-  version "0.4.0"
+  url "https://github.com/todokr/timothy/releases/download/v0.5.0/tim"
+  sha256 "86b7db01be42d1c6e26978ab4a38bf6cf70eeaa2573740cca991e3207e6f2f02"
+  version "0.5.0"
   license "EPL-2.0"
 
   depends_on "node"
